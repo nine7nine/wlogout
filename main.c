@@ -40,6 +40,15 @@ static int margin[] = {230, 230, 230, 230};
 static int space[] = {0, 0};
 static gboolean protocol = TRUE;
 
+
+static void parse_margin(char *optarg) {
+    int margin_value = atoi(optarg);
+    margin[0] = margin_value;
+    margin[1] = margin_value;
+    margin[2] = margin_value;
+    margin[3] = margin_value;
+}
+
 static gboolean process_args(int argc, char *argv[])
 {
     static struct option long_options[] =
@@ -90,10 +99,7 @@ static gboolean process_args(int argc, char *argv[])
         switch (c)
         {
             case 'm':
-                margin[0] = atoi(optarg);
-                margin[1] = atoi(optarg);
-                margin[2] = atoi(optarg);
-                margin[3] = atoi(optarg);
+                parse_margin(optarg);
                 break;
             case 'L':
                 margin[2] = atoi(optarg);
