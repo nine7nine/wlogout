@@ -6,39 +6,30 @@
 #include <getopt.h>
 #include <gtk/gtk.h>
 #include "jsmn.h"
+#include "main.h"
+
 #ifdef LAYERSHELL
 #include <gtk-layer-shell/gtk-layer-shell.h>
 #endif
 
 #ifdef LAYERSHELL
-static const int exclusive_level = -1;
+const int exclusive_level = -1;
 #endif
-static const int default_size = 100;
-static const char *version = "1.1.1";
+const int default_size = 100;
+const char *version = "1.1.1";
 
-typedef struct
-{
-    char *label;
-    char *action;
-    char *text;
-    float yalign;
-    float xalign;
-    guint bind;
-    gboolean circular;
-} button;
+char *command = NULL;
+char *layout_path = NULL;
+char *css_path = NULL;
+button *buttons = NULL;
+GtkWidget *gtk_window = NULL;
 
-static char *command = NULL;
-static char *layout_path = NULL;
-static char *css_path = NULL;
-static button *buttons = NULL;
-static GtkWidget *gtk_window = NULL;
+int num_buttons = 0;
 
-static int num_buttons = 0;
-
-static int buttons_per_row = 3;
-static int margin[] = {230, 230, 230, 230};
-static int space[] = {0, 0};
-static gboolean protocol = TRUE;
+int buttons_per_row = 3;
+int margin[] = {230, 230, 230, 230};
+int space[] = {0, 0};
+gboolean protocol = TRUE;
 
 
 static void parse_margin(char *optarg) {
@@ -49,9 +40,9 @@ static void parse_margin(char *optarg) {
     margin[3] = margin_value;
 }
 
-static gboolean process_args(int argc, char *argv[])
+gboolean process_args(int argc, char *argv[])
 {
-    static struct option long_options[] =
+    struct option long_options[] =
     {
         {"help", no_argument, NULL, 'h'},
         {"layout", required_argument, NULL, 'l'},
@@ -151,7 +142,7 @@ static gboolean process_args(int argc, char *argv[])
     return FALSE;
 }
 
-static gboolean get_layout_path()
+gboolean get_layout_path()
 {
     char *buf = malloc(default_size * sizeof(char));
     if (!buf)
@@ -215,7 +206,7 @@ static gboolean get_layout_path()
     }
 }
 
-static gboolean get_css_path()
+gboolean get_css_path()
 {
     char *buf = malloc(default_size * sizeof(char));
     if (!buf)
@@ -278,7 +269,7 @@ static gboolean get_css_path()
     }
 }
 
-static GtkWidget *get_window()
+GtkWidget *get_window()
 {
     GtkWindow *window = GTK_WINDOW (gtk_window_new (GTK_WINDOW_TOPLEVEL));
 
@@ -304,14 +295,14 @@ static GtkWidget *get_window()
     return GTK_WIDGET(window);
 }
 
-static char *get_substring(char *s, int start, int end, char *buf)
+char *get_substring(char *s, int start, int end, char *buf)
 {
     memcpy(s, &buf[start], (end - start));
     s[end - start] = '\0';
     return s;
 }
 
-static gboolean get_buttons(FILE *json)
+gboolean get_buttons(FILE *json)
 {
     fseek(json, 0L, SEEK_END);
     int length = ftell(json);
@@ -475,7 +466,7 @@ static gboolean get_buttons(FILE *json)
     return FALSE;
 }
 
-static void execute(GtkWidget *widget, char *action)
+void execute(GtkWidget *widget, char *action)
 {
     command = malloc(strlen(action) * sizeof(char) + 1);
     strcpy(command, action);
@@ -483,7 +474,7 @@ static void execute(GtkWidget *widget, char *action)
     gtk_main_quit();
 }
 
-static gboolean check_key(GtkWidget *widget, GdkEventKey *event, gpointer data)
+gboolean check_key(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
     if (event->keyval == GDK_KEY_Escape) {
         gtk_main_quit();
@@ -500,7 +491,7 @@ static gboolean check_key(GtkWidget *widget, GdkEventKey *event, gpointer data)
     return FALSE;
 }
 
-static void load_buttons(GtkWindow *window)
+void load_buttons(GtkWindow *window)
 {
     GtkWidget *grid = gtk_grid_new();
     gtk_container_add(GTK_CONTAINER (window), grid);
@@ -550,7 +541,7 @@ static void load_buttons(GtkWindow *window)
     }
 }
 
-static void load_css()
+void load_css()
 {
     GtkCssProvider *css = gtk_css_provider_new();
     GError *error = NULL;
